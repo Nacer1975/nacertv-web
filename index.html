@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📺 NacerTV</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- HLS.js pour la lecture .m3u8 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- CryptoJS pour le déchiffrement AES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+
+    <!-- 📺 EN-TÊTE -->
+    <header>
+        <h1>📺 NacerTV</h1>
+        <button id="refreshBtn" title="Actualiser">🔄</button>
+    </header>
+
+    <!-- 🎯 ONGLETS -->
+    <nav class="tabs">
+        <button class="tab active" data-tab="tv">📺 TV</button>
+        <button class="tab" data-tab="radio">📻 Radio</button>
+        <button class="tab" data-tab="shows">🎬 Séries</button>
+    </nav>
+
+    <!-- 🔍 RECHERCHE -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher...">
+    </div>
+
+    <!-- 🏷️ CATÉGORIES -->
+    <div class="categories" id="categoriesContainer"></div>
+
+    <!-- 📊 STATS -->
+    <div class="stats" id="statsText">Chargement...</div>
+
+    <!-- 📋 LISTE DES CHAÎNES -->
+    <div class="channels" id="channelsContainer"></div>
+
+    <!-- 🎬 LECTEUR VIDÉO (MODAL) -->
+    <div class="player-modal" id="playerModal">
+        <div class="player-header">
+            <span id="playerTitle">Chaîne</span>
+            <button id="closePlayer">✕</button>
+        </div>
+        <video id="videoPlayer" controls autoplay></video>
+        <div class="player-status" id="playerStatus">⏳ Chargement...</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
