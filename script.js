@@ -362,7 +362,6 @@ function applyFilters() {
 // =====================================================
 // 🎬 LECTURE VIDÉO
 // =====================================================
-
 async function playItem(item) {
     playerModal.classList.add("active");
     playerTitle.textContent = item.name || "Chaîne";
@@ -404,10 +403,7 @@ async function playItem(item) {
     }
 
     // 🎯 Passer par le Worker
-    let finalUrl = WORKER + encodeURIComponent(url);
-    if (swapKey) {
-        finalUrl = WORKER + encodeURIComponent(url.replace(swapKey, swapValue));
-    }
+    const finalUrl = WORKER + encodeURIComponent(url);
     console.log("URL finale:", finalUrl);
 
     // Détruire l'ancien lecteur
@@ -417,7 +413,29 @@ async function playItem(item) {
     }
 
     if (Hls.isSupported()) {
+        // 🎯 Loader qui applique le swap
+        const SwappingLoader = class extends Hls.DefaultConfig.loader {
+            load(context, config, callbacks) {
+                let targetUrl = context.url;
+
+                // Si l'URL n'est pas encore passée par le Worker, la proxifier
+                if (!targetUrl.includes("nacertv-proxy")) {
+                    // Swap si nécessaire
+                    if (swapKey && targetUrl.includes(swapKey)) {
+                        targetUrl = targetUrl.replace(swapKey, swapValue);
+                    }
+                    // Proxifier
+                    targetUrl = WORKER + encodeURIComponent(targetUrl);
+                }
+
+                context.url = targetUrl;
+                super.load(context, config, callbacks);
+            }
+        };
+
         hls = new Hls({
+            pLoader: SwappingLoader,
+            fLoader: SwappingLoader,
             enableWorker: false,
             lowLatencyMode: false,
             manifestLoadingTimeOut: 30000,
