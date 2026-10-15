@@ -373,7 +373,7 @@ async function playItem(item) {
     let url = item.url;
     let swap = item.swap || null;
 
-    // Re-résolution .LS.V2
+    // Re-résolution .LS.V2 si dispo
     const server = item.servers && item.servers[0];
     if (server && server.lsv2 && item.id_live) {
         playerStatus.textContent = "🔄 Résolution...";
@@ -401,7 +401,7 @@ async function playItem(item) {
         }
     }
 
-    // Appliquer swap AVANT le proxy
+    // Appliquer le swap sur l'URL principale AVANT proxy
     let cleanUrl = url;
     if (swapKey && cleanUrl.includes(swapKey)) {
         cleanUrl = cleanUrl.replace(swapKey, swapValue);
@@ -414,25 +414,12 @@ async function playItem(item) {
     if (hls) { hls.destroy(); hls = null; }
 
     if (Hls.isSupported()) {
-        // Loader qui proxy toutes les URLs filles
-        const ProxyLoader = class extends Hls.DefaultConfig.loader {
-            load(context, config, callbacks) {
-                let u = context.url;
-                if (!u.includes("nacertv-proxy")) {
-                    if (swapKey && u.includes(swapKey)) {
-                        u = u.replace(swapKey, swapValue);
-                    }
-                    u = WORKER + encodeURIComponent(u);
-                }
-                context.url = u;
-                super.load(context, config, callbacks);
-            }
-        };
-
         hls = new Hls({
-            pLoader: ProxyLoader,
-            fLoader: ProxyLoader,
             enableWorker: false,
+            lowLatencyMode: false,
+            manifestLoadingTimeOut: 30000,
+            levelLoadingTimeOut: 30000,
+            fragLoadingTimeOut: 60000,
         });
 
         hls.loadSource(finalUrl);
@@ -453,7 +440,6 @@ async function playItem(item) {
         playerStatus.textContent = "❌ HLS non supporté";
     }
 }
-
 // =====================================================
 // 🎬 SÉRIES — Ouvrir une série
 // =====================================================
