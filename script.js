@@ -373,7 +373,7 @@ async function playItem(item) {
     let url = item.url;
     let swap = item.swap || null;
 
-    // Re-résolution .LS.V2 si dispo
+    // 🎯 Re-résolution .LS.V2 si dispo
     const server = item.servers && item.servers[0];
     if (server && server.lsv2 && item.id_live) {
         playerStatus.textContent = "🔄 Résolution...";
@@ -391,26 +391,25 @@ async function playItem(item) {
 
     console.log("URL brute:", url);
 
-    // Extraire swap
+    // 🎯 Extraire swap
     let swapKey = "", swapValue = "";
     if (swap && typeof swap === "object") {
         const keys = Object.keys(swap);
         if (keys.length > 0) {
             swapKey = keys[0];
             swapValue = swap[swapKey];
+            console.log(`🔧 Swap: "${swapKey}" → "${swapValue}"`);
         }
     }
 
-    // Appliquer le swap sur l'URL principale AVANT proxy
-    let cleanUrl = url;
-    if (swapKey && cleanUrl.includes(swapKey)) {
-        cleanUrl = cleanUrl.replace(swapKey, swapValue);
+    // 🎯 Construire l'URL finale du Worker
+    let finalUrl = WORKER + encodeURIComponent(url);
+    if (swapKey) {
+        finalUrl += "&sk=" + encodeURIComponent(swapKey) + "&sv=" + encodeURIComponent(swapValue);
     }
-
-    // Proxifier via le Worker
-    const finalUrl = WORKER + encodeURIComponent(cleanUrl);
     console.log("URL finale:", finalUrl);
 
+    // Détruire l'ancien lecteur
     if (hls) { hls.destroy(); hls = null; }
 
     if (Hls.isSupported()) {
@@ -418,6 +417,7 @@ async function playItem(item) {
             enableWorker: false,
             lowLatencyMode: false,
             manifestLoadingTimeOut: 30000,
+            manifestLoadingMaxRetry: 4,
             levelLoadingTimeOut: 30000,
             fragLoadingTimeOut: 60000,
         });
